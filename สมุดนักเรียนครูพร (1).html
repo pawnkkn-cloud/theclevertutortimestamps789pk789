@@ -1,0 +1,266 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>สมุดนักเรียนครูพร</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<style>
+/* Layout: navy header band → alerts first (summary) → add-session form beside the register list */
+:root{
+  --navy:#0F1D3A; --gold:#D4AF5A; --gold-ink:#7A5A1A;
+  --bg:#F7F2E8; --surface:#FFFFFF; --fg:#0F1D3A; --muted:#4A5468; --line:#DCCFB3;
+  --band:#0F1D3A; --band-fg:#FFFFFF; --band-muted:#C9D2E3;
+  --warn-bg:#FFF4D6; --warn-ink:#7A4B00; --ok-ink:#1F6B3A; --ok-bg:#E3F3E8; --bad-ink:#B3261E;
+  --f-head:'Kanit','IBM Plex Sans Thai',sans-serif;
+  --f-body:'IBM Plex Sans Thai','Kanit',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1528;--surface:#13213F;--fg:#EEF1F7;--muted:#AAB4C8;--line:#26365A;--gold-ink:#E3C47E;--band:#060E1E;
+  --warn-bg:#3A2E10;--warn-ink:#F2D58A;--ok-ink:#8FD6A6;--ok-bg:#16301F;--bad-ink:#FF8A80;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1528;--surface:#13213F;--fg:#EEF1F7;--muted:#AAB4C8;--line:#26365A;--gold-ink:#E3C47E;--band:#060E1E;
+  --warn-bg:#3A2E10;--warn-ink:#F2D58A;--ok-ink:#8FD6A6;--ok-bg:#16301F;--bad-ink:#FF8A80;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--f-head);margin:0;line-height:1.25;text-wrap:balance}
+header.top{background:var(--band);color:var(--band-fg)}
+header.top .wrap{padding-block:22px;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px}
+header.top h1{font-size:1.6rem;font-weight:600}
+header.top h1 span{color:var(--gold)}
+header.top p{margin:4px 0 0;color:var(--band-muted);font-size:.95rem}
+.stats{display:flex;gap:18px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column}
+.stat b{font-family:var(--f-head);font-size:1.6rem;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:.82rem;color:var(--band-muted)}
+main .wrap{padding-block:24px 48px;display:flex;flex-direction:column;gap:24px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.panel h2{font-size:1.2rem;font-weight:600;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.count{font-family:var(--f-head);font-size:.85rem;font-weight:600;background:var(--gold);color:var(--navy);border-radius:999px;padding:1px 10px}
+.sub{color:var(--muted);font-size:.92rem;margin:4px 0 0}
+.alerts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
+.alert{border-radius:14px;padding:16px;background:var(--warn-bg);color:var(--warn-ink);display:flex;flex-direction:column;gap:8px;min-width:0}
+.alert.done{background:var(--ok-bg);color:var(--ok-ink)}
+.alert .who{font-family:var(--f-head);font-weight:600;font-size:1.05rem;color:var(--fg)}
+.alert .meta{font-size:.9rem}
+.alert pre{white-space:pre-wrap;font:inherit;font-size:.88rem;background:var(--surface);color:var(--fg);border-radius:10px;padding:10px;margin:0;border:1px solid var(--line)}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.empty{color:var(--muted);margin:12px 0 0}
+.grid{display:grid;grid-template-columns:minmax(0,360px) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+form{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-family:var(--f-head);font-weight:500;font-size:.92rem}
+.field input,.field select{font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;min-height:44px;width:100%}
+.field input:focus,.field select:focus,.search:focus{outline:3px solid rgba(212,175,90,.45);border-color:var(--gold)}
+.hint{font-size:.85rem;color:var(--muted)}
+.msg{min-height:1.3em;font-size:.9rem;margin:0}
+.msg.err{color:var(--bad-ink)}
+.btn{font-family:var(--f-head);font-weight:500;font-size:.95rem;min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid var(--gold);background:var(--gold);color:var(--navy);cursor:pointer}
+.btn:hover{filter:brightness(1.05)}
+.btn.ghost{background:transparent;color:var(--fg);border-color:var(--line)}
+.btn.sm{min-height:36px;padding:0 12px;font-size:.85rem}
+.btn:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.search{font:inherit;color:var(--fg);background:var(--bg);border:1.5px solid var(--line);border-radius:999px;padding:8px 16px;min-height:44px;width:100%;max-width:340px}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.grp{border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.grp summary{list-style:none;cursor:pointer;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
+.grp summary::-webkit-details-marker{display:none}
+.g-name{font-family:var(--f-head);font-weight:600}
+.g-meta{font-size:.88rem;color:var(--muted);grid-column:1}
+.prog{display:flex;flex-direction:column;align-items:flex-end;gap:4px;grid-row:1/3;grid-column:2}
+.dots{display:flex;gap:4px}
+.dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--gold)}
+.dot.on{background:var(--gold)}
+.dot.next{background:repeating-linear-gradient(45deg,var(--gold) 0 2px,transparent 2px 4px)}
+.ptext{font-family:var(--f-head);font-size:.85rem;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-family:var(--f-head);font-size:.78rem;font-weight:500;border-radius:999px;padding:1px 9px;margin-left:6px;vertical-align:middle}
+.pill.warn{background:var(--warn-bg);color:var(--warn-ink)}
+.pill.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.sess{border-top:1px solid var(--line);padding:6px 16px 14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums;min-width:520px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+th{font-family:var(--f-head);font-weight:500;color:var(--muted);font-size:.82rem}
+td select{font:inherit;font-size:.85rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:4px 6px;min-height:36px}
+.lock{max-width:560px;margin:48px auto;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div>
+      <h1>สมุดนักเรียน <span>ครูพร</span></h1>
+      <p>นับจำนวนครั้งเรียนแยกตามเบอร์โทรและหลักสูตร คอร์สละ 6 ครั้ง · แจ้งเตือนก่อนครั้งที่ 6 ล่วงหน้า 3 วัน</p>
+    </div>
+    <div class="stats" aria-live="polite">
+      <div class="stat"><b id="stStudents">0</b><span>นักเรียน</span></div>
+      <div class="stat"><b id="stActive">0</b><span>คอร์สที่กำลังเรียน</span></div>
+      <div class="stat"><b id="stAlerts">0</b><span>รอแจ้งต่อคอร์ส</span></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="wrap" id="app">
+    <section class="panel" aria-labelledby="hAlerts">
+      <h2 id="hAlerts">แจ้งเตือนต่อคอร์ส <span class="count" id="alertCount">0</span></h2>
+      <p class="sub">นักเรียนที่จะเรียนครั้งที่ 6 ภายใน 3 วัน คัดลอกข้อความไปส่งทาง LINE หรือ SMS แล้วกด "แจ้งแล้ว"</p>
+      <div class="alerts" id="alerts"></div>
+      <p class="empty" id="alertsEmpty">ยังไม่มีนักเรียนที่ใกล้ครบคอร์สใน 3 วันนี้</p>
+    </section>
+
+    <div class="grid">
+      <section class="panel" aria-labelledby="hAdd">
+        <h2 id="hAdd">บันทึกการจองเรียน</h2>
+        <p class="sub">ทุกครั้งที่ได้อีเมลแจ้งการจองจาก Cal.com ให้บันทึกที่นี่ ระบบจะนับให้ว่าเป็นครั้งที่เท่าไรของคอร์ส</p>
+        <form id="addForm" novalidate>
+          <div class="field"><label for="fPhone">เบอร์โทรศัพท์</label><input id="fPhone" type="tel" inputmode="numeric" autocomplete="off" placeholder="0812345678"><span class="hint" id="phoneHint"></span></div>
+          <div class="field"><label for="fName">ชื่อ – นามสกุล</label><input id="fName" type="text" autocomplete="off"></div>
+          <div class="field"><label for="fCourse">หลักสูตร</label>
+            <select id="fCourse"><option value="">เลือกหลักสูตร</option><option>TOEIC</option><option>IELTS</option><option>CU-TEP</option><option>CU-AAT</option><option>SAT Verbal</option><option>ภาษาอังกฤษสำหรับเด็ก</option></select></div>
+          <div class="field"><label for="fMode">รูปแบบ</label><select id="fMode"><option value="online">ออนไลน์</option><option value="onsite">ออนไซต์</option></select></div>
+          <div class="field"><label for="fWhen">วันและเวลาเรียน</label><input id="fWhen" type="datetime-local"></div>
+          <button class="btn" type="submit" id="addBtn">บันทึก</button>
+          <p class="msg" id="addMsg" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="hList">
+        <h2 id="hList">นักเรียนและจำนวนครั้งเรียน</h2>
+        <p class="sub">ครั้งที่ลาหรือยกเลิกจะไม่นับ เมื่อครบ 6 ครั้ง การจองครั้งถัดไปจะเริ่มนับเป็นคอร์สใหม่</p>
+        <div style="margin-top:12px"><label class="hint" for="q">ค้นหาชื่อ เบอร์โทร หรือหลักสูตร</label><br><input class="search" id="q" type="search" placeholder="ค้นหา"></div>
+        <div class="list" id="list"></div>
+        <p class="empty" id="listEmpty">ยังไม่มีข้อมูล เริ่มจากบันทึกการจองครั้งแรกในแบบฟอร์มด้านข้าง</p>
+      </section>
+    </div>
+  </div>
+  <div class="wrap lock" id="lock" hidden>
+    <h2>หน้านี้สำหรับครูพรเท่านั้น</h2>
+    <p class="sub">ข้อมูลนักเรียนและเบอร์โทรถูกเก็บเป็นความลับ เปิดดูและแก้ไขได้เฉพาะเจ้าของหน้านี้</p>
+  </div>
+</main>
+
+<script>
+(function(){
+  var DAY=864e5, PER=6, db=null, sessions=[], editable=true;
+  var $=function(id){return document.getElementById(id)};
+  function digits(s){return String(s||'').replace(/\D/g,'')}
+  function fmtPhone(p){p=digits(p);return p.length===10?p.slice(0,3)+'-'+p.slice(3,6)+'-'+p.slice(6):p}
+  function fmtDate(t){return new Date(t).toLocaleString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'})}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  function groups(){
+    var by={};
+    sessions.forEach(function(s){var k=s.phone+'|'+s.course;(by[k]=by[k]||{phone:s.phone,course:s.course,name:s.name,list:[]}).list.push(s)});
+    var now=Date.now();
+    return Object.keys(by).map(function(k){
+      var g=by[k]; g.list.sort(function(a,b){return a.t-b.t});
+      var n=0; g.list.forEach(function(s){ if(s.status==='leave'){s._num=null;s._round=null;return;} n++; s._num=((n-1)%PER)+1; s._round=Math.floor((n-1)/PER)+1; if(s.name)g.name=s.name; });
+      g.counted=n;
+      var cur=g.list.filter(function(s){return s._round===Math.max(1,Math.ceil(n/PER))});
+      g.round=Math.max(1,Math.ceil(n/PER));
+      g.inRound=cur.length; g.doneInRound=cur.filter(function(s){return s.status==='done'||(s.status==='booked'&&s.t<now)}).length;
+      g.next=g.list.filter(function(s){return s.status==='booked'&&s.t>=now})[0]||null;
+      g.sixth=cur.filter(function(s){return s._num===6})[0]||null;
+      g.finished=!!(g.sixth&&g.sixth.t<now&&!g.next);
+      return g;
+    }).sort(function(a,b){return (a.next?a.next.t:9e15)-(b.next?b.next.t:9e15)});
+  }
+
+  function renewMsg(g){
+    return 'สวัสดีค่ะ คุณ'+g.name+'\nครูพรจาก The Clever Tutors แจ้งให้ทราบว่า คอร์ส '+g.course+' จะเรียนครบ 6 ครั้งในวัน'+fmtDate(g.sixth.t)+' ค่ะ\nถ้าต้องการเรียนต่อคอร์สใหม่ จองเวลาเรียนในระบบได้เลยที่เว็บไซต์ The Clever Tutors หรือทักครูทาง LINE @948evecn ได้เลยนะคะ';
+  }
+
+  function render(){
+    var now=Date.now(), gs=groups(), q=$('q').value.trim().toLowerCase();
+    var alerts=gs.filter(function(g){var s=g.sixth;return s&&s.status==='booked'&&s.t>=now&&s.t-now<=3*DAY});
+    $('stStudents').textContent=new Set(sessions.map(function(s){return s.phone})).size;
+    $('stActive').textContent=gs.filter(function(g){return !g.finished}).length;
+    var pending=alerts.filter(function(g){return !g.sixth.notified}).length;
+    $('stAlerts').textContent=pending; $('alertCount').textContent=pending;
+    $('alertsEmpty').hidden=alerts.length>0;
+    $('alerts').innerHTML=alerts.map(function(g){
+      var s=g.sixth, d=Math.ceil((s.t-now)/DAY);
+      return '<article class="alert'+(s.notified?' done':'')+'"><div class="who">'+esc(g.name)+'</div>'+
+        '<div class="meta">'+esc(fmtPhone(g.phone))+' · '+esc(g.course)+' · คอร์สที่ '+s._round+'</div>'+
+        '<div class="meta"><b>ครั้งที่ 6:</b> '+esc(fmtDate(s.t))+' (อีก '+d+' วัน)</div>'+
+        (s.notified?'<div class="meta">แจ้งต่อคอร์สแล้ว</div>':'<pre>'+esc(renewMsg(g))+'</pre>')+
+        '<div class="row">'+(s.notified?'':'<button class="btn sm" type="button" data-copy="'+esc(s.id)+'">คัดลอกข้อความ</button><button class="btn sm ghost" type="button" data-notified="'+esc(s.id)+'"'+(editable?'':' disabled')+'>แจ้งแล้ว</button>')+'</div>'+
+        '<p class="msg" data-out="'+esc(s.id)+'" aria-live="polite"></p></article>';
+    }).join('');
+    var shown=gs.filter(function(g){return !q||(g.name+' '+g.phone+' '+fmtPhone(g.phone)+' '+g.course).toLowerCase().indexOf(q)>=0});
+    $('listEmpty').hidden=gs.length>0;
+    $('list').innerHTML=shown.map(function(g){
+      var dots='';for(var i=1;i<=PER;i++){var on=i<=g.doneInRound, nx=!on&&i<=g.inRound;dots+='<span class="dot'+(on?' on':nx?' next':'')+'"></span>'}
+      var badge=g.finished?'<span class="pill ok">ครบคอร์สแล้ว</span>':(g.sixth&&g.sixth.status==='booked'&&g.sixth.t-now<=3*DAY&&g.sixth.t>=now?'<span class="pill warn">ใกล้ครบคอร์ส</span>':'');
+      var rows=g.list.map(function(s){
+        return '<tr><td>'+(s._num?s._num+'/6':'–')+'</td><td>'+(s._round||'–')+'</td><td>'+esc(fmtDate(s.t))+'</td><td>'+(s.mode==='onsite'?'ออนไซต์':'ออนไลน์')+'</td>'+
+          '<td><label class="hint" for="st-'+esc(s.id)+'" style="position:absolute;left:-9999px">สถานะ</label><select id="st-'+esc(s.id)+'" data-status="'+esc(s.id)+'"'+(editable?'':' disabled')+'>'+
+          [['booked','จองแล้ว'],['done','เรียนแล้ว'],['leave','ลา/ยกเลิก (ไม่นับ)']].map(function(o){return '<option value="'+o[0]+'"'+(s.status===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+
+          '</select></td><td><button class="btn sm ghost" type="button" data-del="'+esc(s.id)+'"'+(editable?'':' disabled')+'>ลบ</button></td></tr>';
+      }).join('');
+      return '<details class="grp"><summary><span class="g-name">'+esc(g.name)+badge+'</span>'+
+        '<span class="g-meta">'+esc(fmtPhone(g.phone))+' · '+esc(g.course)+' · คอร์สที่ '+g.round+(g.next?' · ครั้งถัดไป '+esc(fmtDate(g.next.t)):'')+'</span>'+
+        '<span class="prog"><span class="dots" aria-hidden="true">'+dots+'</span><span class="ptext">เรียนแล้ว '+g.doneInRound+'/6 · จองแล้ว '+g.inRound+'/6</span></span></summary>'+
+        '<div class="sess"><table><thead><tr><th>ครั้งที่</th><th>คอร์สที่</th><th>วันเวลา</th><th>รูปแบบ</th><th>สถานะ</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></details>';
+    }).join('');
+  }
+
+  // phone lookup fills name
+  $('fPhone').addEventListener('input',function(){
+    var p=digits(this.value), hit=sessions.filter(function(s){return s.phone===p}).sort(function(a,b){return b.t-a.t})[0];
+    $('phoneHint').textContent=hit?'นักเรียนเดิม: '+hit.name:'';
+    if(hit&&!$('fName').value)$('fName').value=hit.name;
+  });
+
+  $('addForm').addEventListener('submit',async function(e){
+    e.preventDefault(); var m=$('addMsg'); m.className='msg';
+    var phone=digits($('fPhone').value), name=$('fName').value.trim(), course=$('fCourse').value, when=$('fWhen').value, miss=[];
+    if(phone.length<9)miss.push('เบอร์โทร'); if(!name)miss.push('ชื่อ'); if(!course)miss.push('หลักสูตร'); if(!when)miss.push('วันเวลาเรียน');
+    if(miss.length){m.className='msg err';m.textContent='กรุณากรอก '+miss.join(', ');return}
+    var t=new Date(when).getTime();
+    var clash=sessions.filter(function(s){return s.status!=='leave'&&Math.abs(s.t-t)<2*36e5})[0];
+    if(!db){m.className='msg err';m.textContent='ยังเชื่อมฐานข้อมูลไม่ได้ ลองรีเฟรชหน้านี้';return}
+    var id='s'+t+'-'+Math.random().toString(36).slice(2,7);
+    $('addBtn').disabled=true;
+    try{
+      await db.collection('sessions').doc(id).set({phone:phone,name:name,course:course,mode:$('fMode').value,when:when,t:t,status:'booked',notified:false,createdAt:Date.now()});
+      m.textContent='บันทึกแล้ว'+(clash?' · หมายเหตุ: ใกล้กับนัดของ '+clash.name+' ('+fmtDate(clash.t)+') ตรวจดูว่าไม่ชนกัน':'');
+      $('fWhen').value='';
+    }catch(err){m.className='msg err';m.textContent='บันทึกไม่สำเร็จ ('+(err&&err.code||'error')+') ลองอีกครั้ง'}
+    $('addBtn').disabled=false;
+  });
+
+  document.addEventListener('click',async function(e){
+    var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.copy){
+      var s=sessions.filter(function(x){return x.id===b.dataset.copy})[0], g=groups().filter(function(x){return x.phone===s.phone&&x.course===s.course})[0], out=document.querySelector('[data-out="'+b.dataset.copy+'"]');
+      try{await navigator.clipboard.writeText(renewMsg(g));out.textContent='คัดลอกแล้ว'}catch(err){out.textContent='กดค้างที่ข้อความเพื่อคัดลอก'}
+    }
+    if(b.dataset.notified&&db){b.disabled=true;try{await db.collection('sessions').doc(b.dataset.notified).update({notified:true})}catch(err){b.disabled=false}}
+    if(b.dataset.del&&db){
+      if(b.dataset.confirm!=='1'){b.dataset.confirm='1';b.textContent='ยืนยันลบ';setTimeout(function(){b.dataset.confirm='';b.textContent='ลบ'},4000);return}
+      b.disabled=true;try{await db.collection('sessions').doc(b.dataset.del).delete()}catch(err){b.disabled=false}
+    }
+  });
+  document.addEventListener('change',async function(e){
+    var sel=e.target.closest('select[data-status]'); if(!sel||!db)return;
+    sel.disabled=true;try{await db.collection('sessions').doc(sel.dataset.status).update({status:sel.value})}catch(err){}sel.disabled=false;
+  });
+  $('q').addEventListener('input',render);
+  setInterval(render,6e4);
+  render();
+
+  (async function(){
+    var user=window.claude&&await window.claude.use('user');
+    db=window.claude&&await window.claude.use('db');
+    if(!db){$('app').hidden=true;$('lock').hidden=false;return}
+    if(user){var ok=user.canEdit?await user.canEdit():true;if(ok===false){editable=false}}
+    db.collection('sessions').onSnapshot(function(snap){
+      sessions=snap.docs.map(function(d){var x=Object.assign({},d.data());x.id=d.id;return x}).filter(function(x){return x.phone&&x.t});
+      render();
+    },function(){$('addMsg').className='msg err';$('addMsg').textContent='การเชื่อมต่อขาด กรุณารีเฟรชหน้านี้'});
+  })();
+})();
+</script>
+
+</body></html>
